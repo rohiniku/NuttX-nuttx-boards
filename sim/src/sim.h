@@ -92,5 +92,8 @@
 int sim_zoneinfo(int minor);
 #endif
 
+#ifdef CONFIG_USBHOST
+int sim_usbhost_initialize(void);
+#endif
 
 #endif /* __CONFIGS_SIM_SRC_SIM_H */

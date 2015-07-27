@@ -1,7 +1,7 @@
-############################################################################
-# configs/sim/src/Makefile
+#!/bin/bash
+# sim/nsh/setenv.sh
 #
-#   Copyright (C) 2007, 2008, 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,66 +31,15 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
-include $(TOPDIR)/Make.defs
+if [ "$(basename $0)" = "setenv.sh" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-CFLAGS += -I$(TOPDIR)/sched
-CFLAGS += -I$(TOPDIR)/arch/sim/src
+if [ -z ${PATH_ORIG} ]; then export PATH_ORIG=${PATH}; fi
 
-ASRCS =
-AOBJS = $(ASRCS:.S=$(OBJEXT))
+#export NUTTX_BIN=
+#export PATH=${NUTTX_BIN}:/sbin:/usr/sbin:${PATH_ORIG}
 
-CSRCS =
-
-ifeq ($(CONFIG_BOARD_INITIALIZE),y)
-  CSRCS += sim_boot.c
-ifeq ($(CONFIG_SYSTEM_ZONEINFO_ROMFS),y)
-  CSRCS += sim_zoneinfo.c
-endif
-endif
-
-ifeq ($(CONFIG_SIM_X11FB),y)
-ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
-  CSRCS += sim_touchscreen.c
-endif
-endif
-
-ifeq ($(CONFIG_SIM_USB),y)
-  CSRCS += sim_usb.c
-endif
-
-COBJS = $(CSRCS:.c=$(OBJEXT))
-
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
-
-all: libboard$(LIBEXT)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	$(Q) $(AR) $@ # Create an empty archive
-ifneq ($(OBJS),)
-	$(call ARCHIVE, $@, $(OBJS))
-endif
-
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
-
-depend: .depend
-
-clean:
-	$(call DELFILE, libboard$(LIBEXT))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep
+echo "PATH : ${PATH}"

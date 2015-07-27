@@ -102,6 +102,9 @@ void board_initialize(void)
   (void)trv_mount_world(0, CONFIG_GRAPHICS_TRAVELER_DEFPATH);
 #endif
 
+#ifdef CONFIG_USBHOST
+  (void)sim_usbhost_initialize();
+#endif
 }
 #endif /* CONFIG_BOARD_INITIALIZE */
 
