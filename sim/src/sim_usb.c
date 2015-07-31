@@ -72,7 +72,7 @@
 #endif
 
 #ifndef CONFIG_SIM_USBHOST_STACKSIZE
-#  define CONFIG_SIM_USBHOST_STACKSIZE 1024
+#  define CONFIG_SIM_USBHOST_STACKSIZE 100*1024
 #endif
 
 /************************************************************************************
