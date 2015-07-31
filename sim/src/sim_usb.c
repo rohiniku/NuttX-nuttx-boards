@@ -67,6 +67,14 @@
 #  undef HAVE_USB
 #endif
 
+#ifndef CONFIG_SIM_USBHOST_PRIO
+#  define CONFIG_SIM_USBHOST_PRIO 100
+#endif
+
+#ifndef CONFIG_SIM_USBHOST_STACKSIZE
+#  define CONFIG_SIM_USBHOST_STACKSIZE 1024
+#endif
+
 /************************************************************************************
  * Private Data
  ************************************************************************************/
@@ -74,6 +82,33 @@
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: usbhost_waiter
+ *
+ * Description:
+ *   Wait for USB devices to be connected.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_USBHOST
+static int usbhost_waiter(int argc, char *argv[])
+{
+  struct usbhost_hubport_s *hport;
+
+  uvdbg("Running\n");
+  for (;;)
+    {
+      /* Wait for the device to change state */
+      sim_libusb_handle_events();
+      usleep(100000);
+    }
+
+  /* Keep the compiler from complaining */
+
+  return 0;
+}
+#endif
 
 /************************************************************************************
  * Public Functions
@@ -93,7 +128,7 @@
 int sim_usbhost_initialize(void)
 {
   int ret;
-
+  int pid;
   /* First, register all of the class drivers needed to support the drivers
    * that we care about:
    */
@@ -166,7 +201,10 @@ int sim_usbhost_initialize(void)
           udbg("Failed to register libusb hotplug detection\n");
           return -ENODEV;
         }
-      return OK;
+      pid = task_create("usbhost", CONFIG_SIM_USBHOST_PRIO,
+                        CONFIG_SIM_USBHOST_STACKSIZE,
+                        (main_t)usbhost_waiter, (FAR char * const *)NULL);
+      return pid < 0 ? -ENOEXEC : OK;
     }
 
   return -ENODEV;
