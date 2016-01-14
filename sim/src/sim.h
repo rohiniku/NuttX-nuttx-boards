@@ -45,10 +45,29 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define SIM_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define SIM_PROCFS_MOUNTPOINT "/proc"
+#  endif
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sim_bringup
+ *
+ * Description:
+ *   Bring up simulated board features
+ *
+ ****************************************************************************/
+
+int sim_bringup(void);
 
 /****************************************************************************
  * Name: sim_zoneinfo
@@ -91,6 +110,5 @@
 #ifdef CONFIG_SYSTEM_ZONEINFO_ROMFS
 int sim_zoneinfo(int minor);
 #endif
-
 
 #endif /* __CONFIGS_SIM_SRC_SIM_H */

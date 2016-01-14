@@ -78,12 +78,6 @@ GNU Toolchain Options
 
      An alias in your .bashrc file might make that less painful.
 
-  3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
-     work with the Cygwin make.
-
-       MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
-
   The CodeSourcery Toolchain (2009q1)
   -----------------------------------
   The CodeSourcery toolchain (2009q1) does not work with default optimization
@@ -424,6 +418,30 @@ it.
 https://github.com/texane/stlink
 --------------------------------
 This is an open source server for the ST-Link that I have never used.
+
+It is also possible to use an external debugger such as the Segger JLink 
+(EDU or commercial models) provided:
+
+1) The CN4 jumpers are removed to disconnect the on-board STLinkV2 from 
+   the STM32F3.
+
+2) The appropriate (20 pin connector to flying wire) adapter is used to connect
+   the debugger to the required pins on the expansion headers (see below).
+
+   Note that the 1x6 header on the STLinkV2 side of the board labeled "SWD"
+   is for the STLink micro (STM32F1) and is not connected to the STM32F3.
+
+3) OpenOCD version 0.9.0 or later is used.  Earlier versions support either
+   JTAG only or are buggy for SWD.
+
+The signals used with external (SWD) debugging are:
+
+   VREF (3V) 
+   GROUND (GND)
+   SWCLK (PA14)
+   SWIO (PA13)
+   SWO (PB3)
+   RESET (NRST)
 
 Atollic GDB Server
 ------------------

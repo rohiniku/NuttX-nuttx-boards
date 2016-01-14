@@ -113,7 +113,7 @@ CONFIG_ARCH_HAVE_CMNVECTOR=y
 CONFIG_ARCH_HAVE_FPU=y
 # CONFIG_ARCH_HAVE_DPFPU is not set
 # CONFIG_ARCH_FPU is not set
-# CONFIG_ARMV7M_MPU is not set
+# CONFIG_ARM_MPU is not set
 
 #
 # ARMV7M Configuration Options
@@ -708,7 +708,6 @@ CONFIG_INPUT=y
 # CONFIG_BUTTONS is not set
 # CONFIG_DJOYSTICK is not set
 # CONFIG_AJOYSTICK is not set
-# CONFIG_DISCRETE_IO is not set
 CONFIG_LCD=y
 
 #

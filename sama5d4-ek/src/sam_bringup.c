@@ -91,7 +91,8 @@ int sam_bringup(void)
 {
 #if defined(HAVE_NAND) || defined(HAVE_AT25) || defined(HAVE_HSMCI)  || \
     defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || defined(HAVE_WM8904) || \
-    defined(HAVE_AUTOMOUNTER) || defined(HAVE_ELF) || defined(HAVE_ROMFS)
+    defined(HAVE_AUTOMOUNTER) || defined(HAVE_ELF) || defined(HAVE_ROMFS) || \
+    defined(CONFIG_FS_PROCFS)
   int ret;
 #endif
 
@@ -259,6 +260,17 @@ int sam_bringup(void)
   if (ret < 0)
     {
       SYSLOG("ERROR: Initialization of the ELF loader failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, SAMA5_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
+             SAMA5_PROCFS_MOUNTPOINT, ret);
     }
 #endif
 

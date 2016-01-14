@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm32f4discovery/src/stm32f4discovery.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,9 @@
 #elif STM32_NSPI < 3
 #  undef CONFIG_STM32_SPI3
 #endif
+
+#define PCA9635_I2CBUS  1
+#define PCA9635_I2CADDR 0x40
 
 /* Assume that we have everything */
 
@@ -169,6 +172,16 @@
 
 #ifdef CONFIG_STM32F4DISBB
 #  undef HAVE_NETMONITOR
+#endif
+
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define STM32_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define STM32_PROCFS_MOUNTPOINT "/proc"
+#  endif
 #endif
 
 /* STM32F4 Discovery GPIOs **************************************************/
@@ -544,6 +557,26 @@ int stm32_zerocross_initialize(void);
 
 #ifdef CONFIG_MAX6675
 int stm32_max6675initialize(FAR const char *devpath);
+#endif
+
+/****************************************************************************
+ * Name: stm32_pca9635_initialize
+ *
+ * Description:
+ *   This function is called by board initialization logic to configure the
+ *   LED PWM chip.  This function will register the driver as /dev/leddrv0.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_PCA9635PW
+int stm32_pca9635_initialize(void);
 #endif
 
 /****************************************************************************

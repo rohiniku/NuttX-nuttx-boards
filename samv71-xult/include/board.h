@@ -60,6 +60,7 @@
  * There are two on-board crystals:
  */
 
+#define BOARD_HAVE_SLOWXTAL        1          /* Slow crystal is populated */
 #define BOARD_SLOWCLK_FREQUENCY    (32768)    /* 32.768 KHz slow crystal oscillator */
 #define BOARD_MAINOSC_FREQUENCY    (12000000) /* 12 MHz main oscillator */
 
@@ -140,7 +141,7 @@
 #define BOARD_PLLA_FREQUENCY       (300000000) /* PLLACK:  25 * 12Mhz / 1 */
 #define BOARD_CPU_FREQUENCY        (300000000) /* CPU:     PLLACK / 1 */
 #define BOARD_MCK_FREQUENCY        (150000000) /* MCK:     PLLACK / 1 / 2 */
-#define BOARD_UPLL_FREQUENCY                   /* To be provided */
+#undef  BOARD_UPLL_FREQUENCY                   /* To be provided */
 
 /* HSMCI clocking
  *

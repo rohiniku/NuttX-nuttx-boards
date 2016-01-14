@@ -219,7 +219,7 @@ Buildroot:
   at ../buildroot/build_avr.  Edit the setenv.sh file if
   this is not the case.
 
-  After configuring NuttX, make sure that CONFIG_AVR_BUILDROOT=y is set in your
+  After configuring NuttX, make sure that CONFIG_AVR_BUILDROOT_TOOLCHAIN=y is set in your
   .config file.
 
 WinAVR:
@@ -230,19 +230,25 @@ WinAVR:
   It is assumed in some places that WinAVR is installed at C:/WinAVR.  Edit the
   setenv.sh file if this is not the case.
 
-  After configuring NuttX, make sure that CONFIG_AVR_WINAVR=y is set in your
+  After configuring NuttX, make sure that CONFIG_AVR_WINAVR_TOOLCHAIN=y is set in your
   .config file.
 
   WARNING:  There is an incompatible version of cygwin.dll in the WinAVR/bin
   directory!  Make sure that the path to the correct cygwin.dll file precedes
   the path to the WinAVR binaries!
 
+Atmel Studio
+
+  Another option is to use the AVR toolchain provided within the Atmel Studio
+  installation.  Look in the Atmel/Studio directories and Program Files (x86)
+  to find the tools in a subdirectory like toolchain/avr8/avr8-gnu-toolchain/bin.
+
 Linux:
 
   For Linux, there are widely available avr-gcc packages.  On Ubuntu, use:
   sudo apt-get install gcc-avr gdb-avr avr-libc
 
-  After configuring NuttX, make sure that CONFIG_AVR_LINUXGCC=y is set in your
+  After configuring NuttX, make sure that CONFIG_AVR_LINUXGCC_TOOLCHAIN=y is set in your
   .config file.
 
 Mac OS X:
@@ -277,12 +283,6 @@ Windows Native Toolchains
        make clean_context all
 
      An alias in your .bashrc file might make that less painful.
-
-  3. Dependencies are not made when using Windows versions of the GCC.  This
-     is because the dependencies are generated using Windows pathes which do
-     not work with the Cygwin make.
-
-       MKDEP = $(TOPDIR)/tools/mknulldeps.sh
 
   An additional issue with the WinAVR toolchain, in particular, is that it
   contains an incompatible version of the Cygwin DLL in its bin/ directory.
@@ -545,13 +545,18 @@ Common Configuration Notes
 
         CONFIG_HOST_WINDOWS=y
         CONFIG_WINDOWS_CYGWIN=y
-        CONFIG_AVR_BUILDROOT=y
+        CONFIG_AVR_BUILDROOT_TOOLCHAIN=y
 
 Configuration Sub-Directories
 -----------------------------
 
   hello:
     The simple apps/examples/hello "Hello, World!" example.
+
+  nsh:
+    This is a reduce NuttShell (NSH) configuration using apps/example/nsh.
+    The serial console is provided on USART1 and can be accessed via
+    an external RS-232 driver as described above under "Serial Console".
 
   ostest:
     This configuration directory, performs a simple OS test using

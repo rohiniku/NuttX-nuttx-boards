@@ -19,25 +19,16 @@ Contents
   - USBHS Device Controller Driver
   - MCAN1 Loopback Test
   - SPI Slave
+  - Tickless OS
   - Debugging
   - Configurations
 
 Status/Open Issues
 ==================
 
-Although this configuration is not particualarly different from the
-SAMV71-XULT board, my initial attempts to debug the board have not been
-successful.  The code is just not behaving correctly in excuting the first
-few instructions after reset.  I have very early realease boards and I am
-suspected some tool/board issue:  It appears that I write the code
-correctly to FLASH and the GPNVM is configured so that the FLASH lies at
-address 0x00000000, but trying to step through with AtmelStudio 7 results
-in uninterpretble behavior.  Using the Segger J-Link, I get errors trying
-to reset and halt the board so I am unable to use that debugger either.
-
-WARNING:  This README derives heavily from the SAMV71-XULT README file and
-may still contain some logic that pertains only to that board.  This is a
-work in progress
+2015-11-30: The basic NSH configuration is function with serial console
+  via the EDBG VCOM and LED and buttons support.  SDRAM and the HSMCI
+  SD card slot also appear to be fully functional.
 
 See also configs/samv71-xult/README.txt
 
@@ -125,6 +116,11 @@ Any of these options can be selected as the serial console by:
   2. Configuring the peripheral in the "Drivers -> Serial Configuration"
      menu.
 
+NOTE: If USART1 is used (TXD1, RXD1), then PB4 must be reconfigured in the
+SUPC.  Normally, PB4 is TDI.  When it is reconfigured for use with USART1,
+the capability to debug is lost!  If you plan to debug you should most
+certainly not use USART1.
+
 SD Card
 =======
 
@@ -141,10 +137,10 @@ E70. SD card connector:
   PA30   MCDA0 (DAT0)
   PA31   MCDA1 (DAT1)
   PA26   MCDA2 (DAT2)
-  PA27   MCDA3 (DAT3)      Camera
+  PA27   MCDA3 (DAT3)
   PA25   MCCK (CLK)        Shield
   PA28   MCCDA (CMD)
-  PD18   Card Detect (C/D) Shield
+  PC16   Card Detect (C/D) Shield
   ------ ----------------- ---------------------
 
 Configuration Settings
@@ -259,9 +255,9 @@ LEDs
 ----
 A single LED is available driven by PC8.
 
-These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+This LED is not used by the board port unless CONFIG_ARCH_LEDS is
 defined.  In that case, the usage by the board port is defined in
-include/board.h and src/sam_autoleds.c. The LEDs are used to encode
+include/board.h and src/sam_autoleds.c. The LED is used to encode
 OS-related events as follows:
 
   ------------------- ----------------------- ------
@@ -276,8 +272,8 @@ OS-related events as follows:
   LED_ASSERTION       An assertion failed     N/C
   LED_PANIC           The system has crashed  FLASH
 
-Thus is LED is statically on, NuttX has successfully  booted and is,
-apparently, running normally.  If LED is flashing at approximately
+Thus if the LED is statically on, NuttX has successfully  booted and is,
+apparently, running normally.  If the LED is flashing at approximately
 2Hz, then a fatal error has been detected and the system has halted.
 
 Buttons
@@ -585,7 +581,7 @@ Pre-requisites:
     prototyped in the nuttx/include/nuttx/arch.h, and (2) it must select
     CONFIG_ARCH_PHY_INTERRUPT in the board configuration file to advertise
     that it supports arch_phy_irq().  This logic can be found at
-    nuttx/configs/sama5d4-ek/src/sam_ethernet.c.
+    nuttx/configs/same70-xplained/src/sam_ethernet.c.
 
   - And a few other things: UDP support is required (CONFIG_NET_UDP) and
     signals must not be disabled (CONFIG_DISABLE_SIGNALS).
@@ -628,6 +624,11 @@ settings:
     CONFIG_SAMV7_USBHS_NDTDS=32               : Number of DMA transfer descriptors
     CONFIG_SAMV7_USBHS_PREALLOCATE=y          : Pre-allocate descriptors
 
+As discussed in the SAMV71-XULT README, this driver will not work correctly
+if the write back data cache is enabled. You must have:
+
+    CONFIG_ARMV7M_DCACHE_WRITETHROUGH=y
+
 In order to be usable, you must all enabled some class driver(s) for the
 USBHS device controller.  Here, for example, is how to configure the CDC/ACM
 serial device class:
@@ -646,9 +647,11 @@ serial device class:
     CONFIG_CDCACM_EPBULKIN_HSSIZE=512         : High speed packet size
     CONFIG_CDCACM_NWRREQS=4                   : Number of write requests
     CONFIG_CDCACM_NRDREQS=8                   : Number of read requests
-    CONFIG_CDCACM_BULKIN_REQLEN=768           : Size of write request buffer
-    CONFIG_CDCACM_RXBUFSIZE=256               : Serial read buffer size
-    CONFIG_CDCACM_TXBUFSIZE=256               : Serial transmit buffer size
+    CONFIG_CDCACM_BULKIN_REQLEN=96            : Size of write request buffer (for full speed)
+    CONFIG_CDCACM_BULKIN_REQLEN=768           : Size of write request buffer (for high speed)
+    CONFIG_CDCACM_RXBUFSIZE=257               : Serial read buffer size
+    CONFIG_CDCACM_TXBUFSIZE=193               : Serial transmit buffer size (for full speed)
+    CONFIG_CDCACM_TXBUFSIZE=769               : Serial transmit buffer size (for high speed)
     CONFIG_CDCACM_VENDORID=0x0525             : Vendor ID
     CONFIG_CDCACM_PRODUCTID=0xa4a7            : Product ID
     CONFIG_CDCACM_VENDORSTR="NuttX"           : Vendor string
@@ -835,6 +838,139 @@ SPI Slave
 
   b) It will hog all of the CPU for the duration of the transfer).
 
+Tickless OS
+===========
+
+  Background
+  ----------
+  By default, a NuttX configuration uses a periodic timer interrupt that
+  drives all system timing. The timer is provided by architecture-specific
+  code that calls into NuttX at a rate controlled by CONFIG_USEC_PER_TICK.
+  The default value of CONFIG_USEC_PER_TICK is 10000 microseconds which
+  corresponds to a timer interrupt rate of 100 Hz.
+
+  An option is to configure NuttX to operation in a "tickless" mode. Some
+  limitations of default system timer are, in increasing order of
+  importance:
+
+  - Overhead: Although the CPU usage of the system timer interrupt at 100Hz
+    is really very low, it is still mostly wasted processing time. One most
+    timer interrupts, there is really nothing that needs be done other than
+    incrementing the counter.
+  - Resolution: Resolution of all system timing is also determined by
+    CONFIG_USEC_PER_TICK. So nothing that be time with resolution finer than
+    10 milliseconds be default. To increase this resolution,
+    CONFIG_USEC_PER_TICK an be reduced. However, then the system timer
+    interrupts use more of the CPU bandwidth processing useless interrupts.
+  - Power Usage: But the biggest issue is power usage. When the system is
+    IDLE, it enters a light, low-power mode (for ARMs, this mode is entered
+    with the wfi or wfe instructions for example). But each interrupt
+    awakens the system from this low power mode. Therefore, higher rates
+    of interrupts cause greater power consumption.
+
+  The so-called Tickless OS provides one solution to issue. The basic
+  concept here is that the periodic, timer interrupt is eliminated and
+  replaced with a one-shot, interval timer. It becomes event driven
+  instead of polled: The default system timer is a polled design. On
+  each interrupt, the NuttX logic checks if it needs to do anything
+  and, if so, it does it.
+
+  Using an interval timer, one can anticipate when the next interesting
+  OS event will occur, program the interval time and wait for it to fire.
+  When the interval time fires, then the scheduled activity is performed.
+
+  Configuration
+  -------------
+  The following configuration options will enable support for the Tickless
+  OS for the SAMV7 platforms using TC0 channels 0-3 (other timers or
+  timer channels could be used making the obvious substitutions):
+
+    RTOS Features -> Clocks and Timers
+      CONFIG_SCHED_TICKLESS=y          : Configures the RTOS in tickless mode
+      CONFIG_SCHED_TICKLESS_ALARM=n    : (option not implemented)
+      CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP=y
+
+    System Type -> SAMV7 Peripheral Support
+      CONFIG_SAMV7_TC0=y               : Enable TC0 (TC channels 0-3
+
+    System Type -> Timer/counter Configuration
+      CONFIG_SAMV7_ONESHOT=y           : Enables one-shot timer wrapper
+      CONFIG_SAMV7_FREERUN=y           : Enabled free-running timer wrapper
+      CONFIG_SAMV7_TICKLESS_ONESHOT=0  : Selects TC0 channel 0 for the one-shot
+      CONFIG_SAMV7_TICKLESS_FREERUN=1  : Selects TC0 channel 1 for the free-
+                                       : running timer
+
+  The resolution of the clock is provided by the CONFIG_USEC_PER_TICK
+  setting in the configuration file.
+
+  NOTE: In most cases, the slow clock will be used as the timer/counter
+  input.  The SAME70-Xplained board has pads for a 32.768KHz crystal,
+  however, the boad ships with that position unpopulated.  So, be default
+  this will probably end up using the slow RC oscillator which will give
+  you very bad timing.
+
+  If you add a crystal to your board, you can select to use it with the
+  definition BOARD_HAVE_SLOWXTAL in the configs/same70-xplained/board.h
+  file.
+
+  The slow clock has a resolution of about 30.518 microseconds.  Ideally,
+  the value of CONFIG_USEC_PER_TICK should be the exact clock resolution.
+  Otherwise there will be cumulative timing inaccuracies.  But a choice
+  choice of:
+
+    CONFIG_USEC_PER_TICK=31
+
+  will have an error of 0.6%  and will have inaccuracies that will
+  effect the time due to long term error build-up.
+
+  Using the slow clock clock input, the Tickless support is functional,
+  however, there are inaccuracies  in delays.  For example,
+
+    nsh> sleep 10
+
+  results in a delay of maybe 5.4 seconds.  But the timing accuracy is
+  correct if all competing uses of the interval timer are disabled (mostly
+  from the high priority work queue).  Therefore, I conclude that this
+  inaccuracy is due to the inaccuracies in the representation of the clock
+  rate.  30.518 usec cannot be represented accurately.   Each timing
+  calculation results in a small error.  When the interval timer is very
+  busy, long delays will be divided into many small pieces and each small
+  piece has a large error in the calculation.  The cumulative error is the
+  cause of the problem.
+
+  Solution:  The same70-xplained/src/sam_boot.c file has additional logic
+  to enable the programmable clock PCK6 as a clock source for the
+  timer/counters if the Tickless mode is selected.  The ideal frequency
+  would be:
+
+    frequency = 1,000,000 / CONFIG_USEC_PER_TICK
+
+  The main crystal is selected as the frequency source.  The maximum
+  prescaler value is 256 so the minimum frequency is 46,875 Hz which
+  corresponds to a period of 21.3 microseconds.  A value of
+  CONFIG_USEC_PER_TICK=20, or 50KHz, would give an exact solution with
+  a divider of 240.
+
+  SAME70 Timer Usage
+  ------------------
+  This current implementation uses two timers:  A one-shot timer to
+  provide the timed events and a free running timer to provide the current
+  time.  Since timers are a limited resource, that could be an issue on
+  some systems.
+
+  We could do the job with a single timer if we were to keep the single
+  timer in a free-running at all times.  The SAME70 timer/counters have
+  16-bit counters with the capability to generate a compare interrupt when
+  the timer matches a compare value but also to continue counting without
+  stopping (giving another, different interrupt when the timer rolls over
+  from 0xffff to zero).  So we could potentially just set the compare at
+  the number of ticks you want PLUS the current value of timer.  Then you
+  could have both with a single timer:  An interval timer and a free-
+  running counter with the same timer!  In this case, you would want to
+  to set CONFIG_SCHED_TICKLESS_ALARM in the NuttX configuration.
+
+  Patches are welcome!
+
 Debugging
 =========
 
@@ -895,7 +1031,35 @@ NOTES:
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output on UART3 (i.e., for the Arduino serial shield).
+     output on USART1 (the EDBG VCOM)
+
+     NOTE: When USART1 is used, the pin PB4 is reconfigured.  Normally, PB4
+     is TDI.  When it is reconfigured for use with USART1, the capability to
+     debug is lost!  If you plan to debug you should most certainly not use
+     USART1.  UART3 might be a good option (the Arduino RXD/TXD):
+
+       -CONFIG_SAMV7_USART1=y
+       -CONFIG_USART1_ISUART=y
+       -CONFIG_USART1_SERIAL_CONSOLE=y
+       -CONFIG_USART1_RXBUFSIZE=256
+       -CONFIG_USART1_TXBUFSIZE=256
+       -CONFIG_USART1_BAUD=115200
+       -CONFIG_USART1_BITS=8
+       -CONFIG_USART1_PARITY=0
+       -CONFIG_USART1_2STOP=0
+
+       +CONFIG_SAMV7_UART3=y
+       +CONFIG_UART3_SERIAL_CONSOLE=y
+       +CONFIG_UART3_RXBUFSIZE=256
+       +CONFIG_UART3_TXBUFSIZE=256
+       +CONFIG_UART3_BAUD=115200
+       +CONFIG_UART3_BITS=8
+       +CONFIG_UART3_PARITY=0
+       +CONFIG_UART3_2STOP=0
+
+     UART3 is not the default because (1) the placement of the RJ-45 connector
+     makes it difficult to install Arduino shield cards and (2) the Arduino
+     connectors are not populated on the board as it comes from the factory.
 
   3. All of these configurations are set up to build under Windows using the
      "GNU Tools for ARM Embedded Processors" that is maintained by ARM
@@ -933,99 +1097,11 @@ NOTES:
 Configuration sub-directories
 -----------------------------
 
-  knsh:
-
-    This is identical to the nsh configuration below except that NuttX
-    is built as a kernel-mode, monolithic module and the user applications
-    are built separately.  There are three very similar NSH configurations:
-
-      - knsh.  This is a somewhat simplified version of the nsh configuration
-        that builds using the protected build mode (CONFIG_BUILD_PROTECTED=y).
-      - nsh.  This configuration is focused on low level, command-line
-        driver testing.  It has no network.
-      - netnsh.  This configuration is focused on network testing and
-        has only limited command support.
-
-    It is recommends to use a special make command; not just 'make' but make
-    with the following two arguments:
-
-        make pass1 pass2
-
-    In the normal case (just 'make'), make will attempt to build both user-
-    and kernel-mode blobs more or less interleaved.  This actual works!
-    However, for me it is very confusing so I prefer the above make command:
-    Make the user-space binaries first (pass1), then make the kernel-space
-    binaries (pass2)
-
-    NOTES:
-
-    1. At the end of the build, there will be several files in the top-level
-       NuttX build directory:
-
-       PASS1:
-         nuttx_user.elf    - The pass1 user-space ELF file
-         nuttx_user.hex    - The pass1 Intel HEX format file (selected in defconfig)
-         User.map          - Symbols in the user-space ELF file
-
-       PASS2:
-         nuttx             - The pass2 kernel-space ELF file
-         nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
-         System.map        - Symbols in the kernel-space ELF file
-
-       The J-Link programmer will except files in .hex, .mot, .srec, and .bin
-       formats.
-
-    2. Combining .hex files.  If you plan to use the .hex files with your
-       debugger or FLASH utility, then you may need to combine the two hex
-       files into a single .hex file.  Here is how you can do that.
-
-       a. The 'tail' of the nuttx.hex file should look something like this
-          (with my comments added):
-
-            $ tail nuttx.hex
-            # 00, data records
-            ...
-            :10 9DC0 00 01000000000800006400020100001F0004
-            :10 9DD0 00 3B005A0078009700B500D400F300110151
-            :08 9DE0 00 30014E016D0100008D
-            # 05, Start Linear Address Record
-            :04 0000 05 0800 0419 D2
-            # 01, End Of File record
-            :00 0000 01 FF
-
-          Use an editor such as vi to remove the 05 and 01 records.
-
-       b. The 'head' of the nuttx_user.hex file should look something like
-          this (again with my comments added):
-
-            $ head nuttx_user.hex
-            # 04, Extended Linear Address Record
-            :02 0000 04 0801 F1
-            # 00, data records
-            :10 8000 00 BD89 01084C800108C8110208D01102087E
-            :10 8010 00 0010 00201C1000201C1000203C16002026
-            :10 8020 00 4D80 01085D80010869800108ED83010829
-            ...
-
-          Nothing needs to be done here.  The nuttx_user.hex file should
-          be fine.
-
-       c. Combine the edited nuttx.hex and un-edited nuttx_user.hex
-          file to produce a single combined hex file:
-
-          $ cat nuttx.hex nuttx_user.hex >combined.hex
-
-       Then use the combined.hex file with the to write the FLASH image.
-       If you do this a lot, you will probably want to invest a little time
-       to develop a tool to automate these steps.
-
   netnsh:
 
-    Configures the NuttShell (nsh) located at examples/nsh.  There are three
+    Configures the NuttShell (nsh) located at examples/nsh.  There are two
     very similar NSH configurations:
 
-      - knsh.  This is a somewhat simplified version of the nsh configuration
-        that builds using the protected build mode (CONFIG_BUILD_PROTECTED=y).
       - nsh.  This configuration is focused on low level, command-line
         driver testing.  It has no network.
       - netnsh.  This configuration is focused on network testing and
@@ -1033,9 +1109,9 @@ Configuration sub-directories
 
     NOTES:
 
-    1. The serial console is configured by default for use with and Arduino
-       serial shield (UART3).  You will need to reconfigure if you will
-       to use a different U[S]ART.
+    1. The serial console is configured by default for use with the EDBG VCOM
+       (USART1).  You will need to reconfigure if you will to use a different
+       U[S]ART.  See "Information Common to All Configurations" above.
 
     2. Default stack sizes are large and should really be tuned to reduce
        the RAM footprint:
@@ -1128,11 +1204,9 @@ Configuration sub-directories
 
   nsh:
 
-    Configures the NuttShell (nsh) located at examples/nsh.  There are three
+    Configures the NuttShell (nsh) located at examples/nsh.  There are two
     very similar NSH configurations:
 
-      - knsh.  This is a somewhat simplified version of the nsh configuration
-        that builds using the protected build mode (CONFIG_BUILD_PROTECTED=y).
       - nsh.  This configuration is focused on low level, command-line
         driver testing.  It has no network.
       - netnsh.  This configuration is focused on network testing and
@@ -1142,7 +1216,7 @@ Configuration sub-directories
 
     1. The serial console is configured by default for use with the EDBG VCOM
        (USART1).  You will need to reconfigure if you will to use a different
-       U[S]ART.
+       U[S]ART.  See "Information Common to All Configurations" above.
 
     2. Default stack sizes are large and should really be tuned to reduce
        the RAM footprint:
@@ -1280,19 +1354,17 @@ Configuration sub-directories
          nsh> i2c dev 3 77
               0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
          00:          -- -- -- -- -- -- -- -- -- -- -- -- --
-         10: -- -- -- -- -- -- -- -- -- -- 1a -- -- -- -- --
+         10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
          20: -- -- -- -- -- -- -- -- 28 -- -- -- -- -- -- --
          30: -- -- -- -- -- -- -- 37 -- -- -- -- -- -- -- --
-         40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- 4e --
+         40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
          50: -- -- -- -- -- -- -- 57 -- -- -- -- -- -- -- 5f
          60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
          70: -- -- -- -- -- -- -- --
-         nsh>
 
-       Where 0x28 is the address of TWI interface to the EDBG, 0x4e is the
-       address of the CP2100CP programmable PLL, and 0x57 and 0x5f are thei
-       addresses of the AT2 EEPROM (I am not sure what the other address,i
-       0x37, is as this writing).
+       Where 0x28 is the address of TWI interface to the EDBG and 0x57 and
+       0x5f are the addresses of the AT24 EEPROM (I am not sure what the
+       other address, 0x37, is as this writing).
 
     7. TWIHS0 is also used to support 256 byte non-volatile storage for
        configuration data using the MTD configuration as described above

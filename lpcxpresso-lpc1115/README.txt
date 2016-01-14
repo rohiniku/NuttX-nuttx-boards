@@ -117,12 +117,6 @@ GNU Toolchain Options
 
      An alias in your .bashrc file might make that less painful.
 
-  3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
-     work with the Cygwin make.
-
-       MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
-
   NOTE 1: The CodeSourcery toolchain (2009q1) does not work with default optimization
   level of -Os (See Make.defs).  It will work with -O0, -O1, or -O2, but not with
   -Os.
@@ -534,7 +528,7 @@ LEDs
   - configs/lpcxpresso-lpc1115/include/board.h - Defines LED constants, types and
     prototypes the LED interface functions.
 
-  - configs/lpcxpresso-lpc1115/src/lpcxpresso_internal.h - GPIO settings for the LEDs.
+  - configs/lpcxpresso-lpc1115/src/lpcxpresso-lpc1115.h - GPIO settings for the LEDs.
 
   - configs/lpcxpresso-lpc1115/src/up_leds.c - LED control logic.
 

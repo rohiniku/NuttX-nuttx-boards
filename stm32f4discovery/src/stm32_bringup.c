@@ -101,6 +101,16 @@ int stm32_bringup(void)
   stm32_zerocross_initialize();
 #endif
 
+#if defined(CONFIG_PCA9635PW)
+  /* Initialize the PCA9635 chip */
+
+  ret = stm32_pca9635_initialize();
+  if (ret < 0)
+    {
+      sdbg("ERROR: stm32_pca9635_initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_SDIO
   /* Initialize the SDIO block driver */
 
@@ -177,5 +187,17 @@ int stm32_bringup(void)
 #ifdef CONFIG_MAX6675
   ret = stm32_max6675initialize("/dev/temp0");
 #endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      sdbg("ERROR: Failed to mount procfs at %s: %d\n",
+           STM32_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
   return ret;
 }

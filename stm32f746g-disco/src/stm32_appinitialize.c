@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include "stm32_ccm.h"
 #include "stm32f746g-disco.h"
 
 /****************************************************************************
@@ -61,5 +62,26 @@
 
 int board_app_initialize(void)
 {
+#ifdef CONFIG_FS_PROCFS
+  int ret;
+
+#ifdef CONFIG_STM32_CCM_PROCFS
+  /* Register the CCM procfs entry.  This must be done before the procfs is
+   * mounted.
+   */
+
+  (void)ccm_procfs_register();
+#endif
+
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, SAMV71_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      SYSLOG("ERROR: Failed to mount procfs at %s: %d\n",
+             SAMV71_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+
   return OK;
 }

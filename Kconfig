@@ -20,6 +20,13 @@ config ARCH_BOARD_AMBER
 		on the Atmel AVR ATMega128 MCU.  There is not much there yet and what is
 		there is untested due to tool-related issues.
 
+config ARCH_BOARD_ARDUINO_MEGA2560
+	bool "Arduino Mega 2560"
+	depends on ARCH_CHIP_ATMEGA2560
+	---help---
+                This option selects the Arduino Mega 2560 board featuring the Atmel
+		Atmega2560 MCU running at 16 MHz.        
+
 config ARCH_BOARD_ARDUINO_DUE
 	bool "Arduino Due"
 	depends on ARCH_CHIP_ATSAM3X8E
@@ -238,6 +245,16 @@ config ARCH_BOARD_KWIKSTIK_K40
 	---help---
 		Kinetis K40 Cortex-M4 MCU.  This port uses the FreeScale KwikStik-K40
 		development board.
+
+config ARCH_BOARD_LAUNCHXL_TMS57004
+	bool "TI LaunchXL-TMS57004"
+	depends on ARCH_CHIP_TMS570LS0432PZ
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		TI Hercules TMS570LS04x/03x LaunchPad Evaluation Kit (LAUNCHXL-
+		TMS57004) featuring the Hercules TMS570LS0432PZ chip.
 
 config ARCH_BOARD_LM3S6432S2E
 	bool "Stellaris RDK-S2E Reference Design Kit"
@@ -1187,6 +1204,11 @@ config ARCH_BOARD_CUSTOM_DIR
 		path to some location outside of the NuttX source tree (like
 		"~/projects/myboard").
 
+config ARCH_BOARD_CUSTOM_DIR_RELPATH
+	bool "Relative custom board directory"
+	---help---
+		Specifies that the board directory is relative to the NuttX directory.
+
 config BOARD_CRASHDUMP
 	bool "Enable Board level logging of crash dumps"
 	default n
@@ -1243,6 +1265,7 @@ endif #ARCH_BOARD_CUSTOM
 config ARCH_BOARD
 	string
 	default "amber"                    if ARCH_BOARD_AMBER
+	default "arduino-mega2560"         if ARCH_BOARD_ARDUINO_MEGA2560
 	default "arduino-due"              if ARCH_BOARD_ARDUINO_DUE
 	default "avr32dev1"                if ARCH_BOARD_AVR32DEV1
 	default "c5471evm"                 if ARCH_BOARD_C5471EVM
@@ -1265,6 +1288,7 @@ config ARCH_BOARD
 	default "freedom-kl26z"            if ARCH_BOARD_FREEDOM_KL26Z
 	default "hymini-stm32v"            if ARCH_BOARD_HYMINI_STM32V
 	default "kwikstik-k40"             if ARCH_BOARD_KWIKSTIK_K40
+	default "launchxl-tms57004"        if ARCH_BOARD_LAUNCHXL_TMS57004
 	default "lincoln60"                if ARCH_BOARD_LINCOLN60
 	default "lm3s6432-s2e"             if ARCH_BOARD_LM3S6432S2E
 	default "lm3s6965-ek"              if ARCH_BOARD_LM3S6965EK
@@ -1420,6 +1444,9 @@ comment "Board-Specific Options"
 if ARCH_BOARD_AMBER
 source "configs/amber/Kconfig"
 endif
+if ARCH_BOARD_ARDUINO_MEGA2560
+source "configs/arduino-mega2560/Kconfig"
+endif
 if ARCH_BOARD_ARDUINO_DUE
 source "configs/arduino-due/Kconfig"
 endif
@@ -1485,6 +1512,9 @@ source "configs/hymini-stm32v/Kconfig"
 endif
 if ARCH_BOARD_KWIKSTIK_K40
 source "configs/kwikstik-k40/Kconfig"
+endif
+if ARCH_BOARD_LAUNCHXL_TMS57004
+source "configs/launchxl-tms57004/Kconfig"
 endif
 if ARCH_BOARD_LINCOLN60
 source "configs/lincoln60/Kconfig"
@@ -1794,12 +1824,19 @@ config BOARDCTL_UNIQUEID_SIZE
 		Provides the size of the memory buffer that must be provided by the
 		caller of board_uniqueid() in which to receive the board unique ID.
 
-config BOARDCTL_SYMTAB
-	bool "Enable symbol table interfaces"
+config BOARDCTL_APP_SYMTAB
+	bool "Enable application symbol table interfaces"
 	default n
 	depends on EXECFUNCS_HAVE_SYMTAB
 	---help---
-		Enables support for the BOARDIOC_SYMTAB boardctl() command.
+		Enables support for the BOARDIOC_APP_SYMTAB boardctl() command.
+
+config BOARDCTL_OS_SYMTAB
+	bool "Enable kernel module symbol table interfaces"
+	default n
+	depends on MODULE
+	---help---
+		Enables support for the BOARDIOC_OS_SYMTAB boardctl() command.
 
 config BOARDCTL_TSCTEST
 	bool "Enable touchscreen test interfaces"

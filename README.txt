@@ -277,6 +277,10 @@ configs/kwikstik-k40.
   Kinetis K40 Cortex-M4 MCU.  This port uses the FreeScale KwikStik-K40
   development board.
 
+configs/launchxl-tms57004
+  TI Hercules TMS570LS04x/03x LaunchPad Evaluation Kit (LAUNCHXL-TMS57004)
+  featuring the Hercules TMS570LS0432PZ chip.
+
 configs/lincoln60
    NuttX port to the Micromint Lincoln 60 board.
 

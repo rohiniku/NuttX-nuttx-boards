@@ -144,12 +144,6 @@ GNU Toolchain Options
 
      An alias in your .bashrc file might make that less painful.
 
-  3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows paths which do not
-     work with the Cygwin make.
-
-       MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
-
 IDEs
 ====
 
@@ -2530,11 +2524,39 @@ Tickless OS
       CONFIG_SAMA5_TICKLESS_FREERUN=1  : Selects TC0 channel 1 for the free-
                                        : running timer
 
+  The resolution of the clock is provided by the CONFIG_USEC_PER_TICK
+  setting in the configuration file.
+
   NOTE: In most cases, the slow clock will be used as the timer/counter
   input.  You should enable the 32.768KHz crystal for the slow clock by
   calling sam_sckc_enable().  Otherwise, you will be doing all system
   timing using the RC clock!  UPDATE: This will now be selected by default
   when you configure for TICKLESS support.
+
+  The slow clock has a resolution of about 30.518 microseconds.  Ideally,
+  the value of CONFIG_USEC_PER_TICK should be the exact clock resolution.
+  Otherwise there will be cumulative timing inaccuracies.  But a choice
+  choice of:
+
+    CONFIG_USEC_PER_TICK=31
+
+  will have an error of 0.6%  and will have inaccuracies that will
+  effect the time due to long term error build-up.
+
+  UPDATE: As of this writing (2015-12-03), the Tickless support is
+  functional.  However, there are inaccuracies  in delays.  For example,
+
+    nsh> sleep 10
+
+  results in a delay of maybe 5.4 seconds.  But the timing accuracy is
+  correct if all competing uses of the interval timer are disabled (mostly
+  from the high priority work queue).  Therefore, I conclude that this
+  inaccuracy is due to the inaccuracies in the representation of the clock
+  rate.  30.518 usec cannot be represented accurately.   Each timing
+  calculation results in a small error.  When the interval timer is very
+  busy, long delays will be divided into many small pieces and each small
+  piece has a large error in the calculation.  The cumulative error is the
+  cause of the problem.
 
   SAMA5 Timer Usage
   -----------------

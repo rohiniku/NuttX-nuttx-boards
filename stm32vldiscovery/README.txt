@@ -76,12 +76,6 @@ GNU Toolchain Options
 
      An alias in your .bashrc file might make that less painful.
 
-  3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
-     work with the Cygwin make.
-
-       MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
-
   The CodeSourcery Toolchain (2009q1)
   -----------------------------------
   The CodeSourcery toolchain (2009q1) does not work with default optimization
@@ -256,7 +250,7 @@ LEDs
 
 It is asumed that STMicro STM32F100RC generic board board has one LED on PA0.
 You should configure the port and pin number in
-configs/stm32vldiscovery/src/stm32f100rc_internal.h. This LED is not used by
+configs/stm32vldiscovery/src/stm32vldiscovery.h. This LED is not used by
 the board port unless CONFIG_ARCH_LEDS is defined.  In that case, the usage by
 the board port is defined in include/board.h and src/up_leds.c. The LED is used
 to encode OS-related events as follows:

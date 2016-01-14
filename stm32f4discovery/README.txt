@@ -97,12 +97,6 @@ GNU Toolchain Options
 
      An alias in your .bashrc file might make that less painful.
 
-  3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
-     work with the Cygwin make.
-
-       MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
-
   The CodeSourcery Toolchain (2009q1)
   -----------------------------------
   The CodeSourcery toolchain (2009q1) does not work with default optimization
@@ -753,7 +747,7 @@ write only so the driver keeps a 128*64/8 = 1KB framebuffer to remember
 the display contents:
 
 Here is how I have the OLED connected.  But you can change this with the
-settings in include/board.h and src/stm324fdiscovery-internal.h.  Connector
+settings in include/board.h and src/stm324fdiscovery.h.  Connector
 pinout for the UG-2864AMBAG01 is specific to the theO.net display board
 that I am using:
 

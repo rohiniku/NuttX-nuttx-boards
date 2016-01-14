@@ -38,15 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 #include <nuttx/board.h>
 
-#include "up_internal.h"
 #include "sim.h"
-
-#ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
-int trv_mount_world(int minor, FAR const char *mountpoint);
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -84,24 +78,6 @@ int trv_mount_world(int minor, FAR const char *mountpoint);
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
-#ifdef CONFIG_SYSTEM_ZONEINFO_ROMFS
-  /* Mount the TZ database */
-
-  (void)sim_zoneinfo(3);
-#endif
-
-#ifdef CONFIG_AJOYSTICK
-  /* Initialize the simulated analog joystick input device */
-
-  sim_ajoy_initialize();
-#endif
-
-#ifdef CONFIG_GRAPHICS_TRAVELER_ROMFSDEMO
-  /* Special initialization for the Traveler game simulation */
-
-  (void)trv_mount_world(0, CONFIG_GRAPHICS_TRAVELER_DEFPATH);
-#endif
-
+  sim_bringup();
 }
 #endif /* CONFIG_BOARD_INITIALIZE */
-
