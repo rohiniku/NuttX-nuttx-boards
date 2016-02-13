@@ -38,10 +38,6 @@
 ASRCS =
 CSRCS = stm32_boot.c stm32_leds.c stm32_spi.c
 
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += stm32_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_CAN),y)
 CSRCS += stm32_can.c
 endif
@@ -70,8 +66,8 @@ ifeq ($(CONFIG_LCD_SSD1289),y) # F103
 CSRCS += stm32_ssd1289.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += stm32_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += stm32_appinit.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)

@@ -73,15 +73,15 @@
 void tiva_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) SSI is not disabled, and 2) the weak function
-   * lm_ssiinitialize() has been brought into the link.
+   * lm_ssidev_initialize() has been brought into the link.
    */
 
   /* The LM4F LaunchPad microSD CS and OLED are on SSI0 (Duh! There is no SSI1) */
 
 #if defined(CONFIG_TIVA_SSI0) /* || defined(CONFIG_TIVA_SSI1) */
-  if (lm4f_ssiinitialize)
+  if (lm4f_spidev_initialize)
     {
-      lm4f_ssiinitialize();
+      lm4f_spidev_initialize();
     }
 #endif
 

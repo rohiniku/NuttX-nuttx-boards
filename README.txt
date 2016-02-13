@@ -315,6 +315,10 @@ configs/lpc4330-xplorer
   NuttX port to the LPC4330-Xplorer board from NGX Technologies featuring
   the NXP LPC4330FET100 MCU
 
+configs/lpc4337-ws
+  NuttX port to the WaveShare LPC4337-ws board featuring the NXP LPC4337JBD144
+  MCU.
+
 configs/lpc4357-evb
   NuttX port to the LPC4357-EVB board from Embest featuring the NXP
   LPC4357FET256 MCU.  Based on the LPC4300 Xplorer port and provided by
@@ -424,6 +428,12 @@ configs/olimex-stm32-h405
   toolchain* under Linux or Cygwin. See the http://www.olimex.com for
   further information. This board features the STMicro STM32F405RGT6 MCU.
   Contributed by Martin Lederhilger.
+
+configs/olimex-stm32-h407
+  This port uses the Olimex STM32 H407 board and a GNU arm-nuttx-elf
+  toolchain* under Linux or Cygwin. See the http://www.olimex.com for
+  further information. This board features the STMicro STM32F407ZGT6 (144
+  pins). Contributed by Neil Hancock.
 
 configs/olimex-stm32-p107
   This port uses the Olimex STM32-P107 board (STM32F107VC) and a GNU arm-nuttx-elf

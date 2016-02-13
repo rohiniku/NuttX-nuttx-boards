@@ -76,7 +76,7 @@
 
 /* Make sure that the NSH configuration will support the SD card */
 
-#if defined(PIC32MZ_HAVE_MMCSD) && defined(CONFIG_NSH_ARCHINIT)
+#if defined(PIC32MZ_HAVE_MMCSD) && defined(CONFIG_LIB_BOARDCTL)
 
    /* Make sure that the NSH configuration uses the correct SPI */
 
@@ -90,7 +90,9 @@
 
    /* Make sure that the NSH configuration uses the slot */
 
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
+#    define CONFIG_NSH_MMCSDSLOTNO 0
+#  elif CONFIG_NSH_MMCSDSLOTNO != 0
 #    warning "The PIC32 Starter Kit has only one slot (0)"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO 0
@@ -177,7 +179,7 @@ extern "C"
 #endif
 
 /************************************************************************************
- * Name: pic32mz_spiinitialize
+ * Name: pic32mz_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the PCB Logic board.
@@ -185,7 +187,7 @@ extern "C"
  ************************************************************************************/
 
 #ifdef CONFIG_PIC32MZ_SPI
-void weak_function pic32mz_spiinitialize(void);
+void weak_function pic32mz_spidev_initialize(void);
 #endif
 
 /************************************************************************************

@@ -70,6 +70,7 @@
 #define HAVE_AUDIO_NULL      1
 #define HAVE_RTC_DSXXXX      1
 #define HAVE_RTC_PCF85263    1
+#define HAVE_I2CTOOL         1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface is not enabled */
@@ -352,6 +353,12 @@
 #  define PCF85263_I2C_ADDRESS 0x51
 #endif
 
+/* Do we need to register I2C drivers on behalf of the I2C tool? */
+
+#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
+#  undef HAVE_I2CTOOL
+#endif
+
 /* SAMV71-XULT GPIO Pin Definitions *************************************************/
 
 /* Ethernet MAC.
@@ -558,7 +565,7 @@ void sam_sdram_config(void);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_NSH_ARCHINIT) || defined(CONFIG_BOARD_INITIALIZE)
+#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_INITIALIZE)
 int sam_bringup(void);
 #endif
 

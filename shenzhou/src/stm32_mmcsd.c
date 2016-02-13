@@ -46,6 +46,8 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "stm32_spi.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -58,10 +60,6 @@
 
 #ifndef CONFIG_STM32_SPI1
 #  undef HAVE_MMCSD
-#else
-#  ifdef CONFIG_SPI_OWNBUS
-#    warning "SPI1 is shared with SD and FLASH but CONFIG_SPI_OWNBUS is defined"
-#  endif
 #endif
 
 /* Can't support MMC/SD features if MMC/SD driver support is not selected */
@@ -99,7 +97,7 @@ int stm32_sdinitialize(int minor)
 
   fvdbg("Initializing SPI port %d\n", STM32_MMCSDSPIPORTNO);
 
-  spi = up_spiinitialize(STM32_MMCSDSPIPORTNO);
+  spi = stm32_spibus_initialize(STM32_MMCSDSPIPORTNO);
   if (!spi)
     {
       fdbg("Failed to initialize SPI port %d\n", STM32_MMCSDSPIPORTNO);

@@ -49,6 +49,8 @@
 #include <nuttx/mmcsd.h>
 #include <nuttx/usb/composite.h>
 
+#include "lpc214x_spi.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -79,7 +81,7 @@
 int composite_archinitialize(void)
 {
   /* If system/composite is built as an NSH command, then SD slot should
-   * already have been initialized in board_app_initialize() (see lpc2148_nsh.c).
+   * already have been initialized in board_app_initialize() (see lpc2148_appinit.c).
    * In this case, there is nothing further to be done here.
    *
    * NOTE: CONFIG_NSH_BUILTIN_APPS is not a fool-proof indication that NSH
@@ -94,7 +96,7 @@ int composite_archinitialize(void)
 
   syslog(LOG_INFO, "Initializing SPI port %d\n", LPC214X_MMCSDSPIPORTNO);
 
-  spi = up_spiinitialize(LPC214X_MMCSDSPIPORTNO);
+  spi = lpc214x_spibus_initialize(LPC214X_MMCSDSPIPORTNO);
   if (!spi)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI port %d\n",

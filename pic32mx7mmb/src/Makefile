@@ -45,8 +45,8 @@ CSRCS += pic32_usbterm.c
 endif
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += pic32_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += pic32_appinit.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)

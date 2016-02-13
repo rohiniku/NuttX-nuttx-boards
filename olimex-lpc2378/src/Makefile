@@ -43,8 +43,8 @@
 ASRCS =
 CSRCS = lpc2378_leds.c
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += lpc2378_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += lpc2378_appinit.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

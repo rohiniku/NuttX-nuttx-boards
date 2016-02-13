@@ -91,13 +91,13 @@ void lpc17_boardinitialize(void)
 #endif
 
   /* Configure SSP chip selects if 1) at least one SSP is enabled, and 2) the weak
-   * function open1788_sspinitialize() has been brought into the link.
+   * function open1788_sspdev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_LPC17_SSP0) || defined(CONFIG_LPC17_SSP1) || defined(CONFIG_LPC17_SSP2)
-  if (open1788_sspinitialize)
+  if (open1788_sspdev_initialize)
     {
-      open1788_sspinitialize();
+      open1788_sspdev_initialize();
     }
 #endif
 
@@ -135,7 +135,7 @@ void board_initialize(void)
    * but the initialization function must run in kernel space.
    */
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
   (void)board_app_initialize();
 #endif
 }

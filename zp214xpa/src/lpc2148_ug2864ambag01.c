@@ -49,6 +49,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "lpc214x_pinsel.h"
+#include "lpc214x_spi.h"
 
 #ifdef CONFIG_LCD_UG2864AMBAG01
 
@@ -156,7 +157,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
   /* Get the SPI1 port interface */
 
-  spi = up_spiinitialize(1);
+  spi = lpc214x_spibus_initialize(1);
   if (!spi)
     {
       lcddbg("Failed to initialize SPI port 1\n");

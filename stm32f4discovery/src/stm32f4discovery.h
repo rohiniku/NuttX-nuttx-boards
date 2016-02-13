@@ -110,12 +110,14 @@
 #  undef HAVE_SDIO
 #endif
 
-#undef SDIO_MINOR      /* Any minor number, default 0 */
+#undef  SDIO_MINOR     /* Any minor number, default 0 */
 #define SDIO_SLOTNO 0  /* Only one slot */
 
 #ifdef HAVE_SDIO
 
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO)
+#    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
+#  elif CONFIG_NSH_MMCSDSLOTNO != 0
 #    warning "Only one MMC/SD slot, slot 0"
 #    undef CONFIG_NSH_MMCSDSLOTNO
 #    define CONFIG_NSH_MMCSDSLOTNO SDIO_SLOTNO
@@ -130,7 +132,7 @@
   /* SD card bringup does not work if performed on the IDLE thread because it
    * will cause waiting.  Use either:
    *
-   *  CONFIG_NSH_ARCHINIT=y, OR
+   *  CONFIG_LIB_BOARDCTL=y, OR
    *  CONFIG_BOARD_INITIALIZE=y && CONFIG_BOARD_INITTHREAD=y
    */
 
@@ -343,7 +345,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the stm32f4discovery
@@ -351,7 +353,7 @@
  *
  ****************************************************************************/
 
-void weak_function stm32_spiinitialize(void);
+void weak_function stm32_spidev_initialize(void);
 
 /****************************************************************************
  * Name: stm32_bmp180initialize
@@ -375,7 +377,7 @@ int stm32_bmp180initialize(FAR const char *devpath);
  *   CONFIG_BOARD_INITIALIZE=y :
  *     Called from board_initialize().
  *
- *   CONFIG_BOARD_INITIALIZE=y && CONFIG_NSH_ARCHINIT=y :
+ *   CONFIG_BOARD_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/
@@ -504,7 +506,7 @@ void stm32_pm_buttons(void);
  *   CONFIG_BOARD_INITIALIZE=y :
  *     Called from board_initialize().
  *
- *   CONFIG_BOARD_INITIALIZE=n && CONFIG_NSH_ARCHINIT=y :
+ *   CONFIG_BOARD_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/

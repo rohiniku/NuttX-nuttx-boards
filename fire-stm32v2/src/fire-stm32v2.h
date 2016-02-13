@@ -66,6 +66,13 @@
 #  warning "The M3 Wildfire only supports CAN1"
 #endif
 
+/* Do we need to register I2C drivers on behalf of the I2C tool? */
+
+#define HAVE_I2CTOOL 1
+#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
+#  undef HAVE_I2CTOOL
+#endif
+
 /* M3 Wildfire GPIOs ****************************************************************/
 /* Camera
  *
@@ -273,14 +280,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_spiinitialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the M3 Wildfire board.
  *
  ************************************************************************************/
 
-void weak_function stm32_spiinitialize(void);
+void weak_function stm32_spidev_initialize(void);
 
 /************************************************************************************
  * Name: stm32_usbinitialize

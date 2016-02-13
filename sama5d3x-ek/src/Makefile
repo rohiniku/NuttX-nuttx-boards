@@ -38,10 +38,6 @@
 ASRCS =
 CSRCS = sam_boot.c
 
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += sam_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_SAMA5_SPI0),y)
 CSRCS += sam_spi.c
 else
@@ -110,8 +106,8 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += sam_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += sam_appinit.c
 endif
 
 ifeq ($(CONFIG_ADC),y)

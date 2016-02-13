@@ -1,5 +1,5 @@
 ############################################################################
-# configs/lpc4330-xplorer/src/Makefile
+# configs/lpc4370-link2/src/Makefile
 #
 #   Copyright (C) 2015 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,8 +38,8 @@
 ASRCS =
 CSRCS = lpc43_boot.c
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += lpc43_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += lpc43_appinit.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
@@ -56,22 +56,12 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += lpc43_usbmsc.c
 endif
 
+ifeq ($(CONFIG_LPC43_ADC0),y)
+CSRCS += lpc43_adc.c
+endif
+
 ifeq ($(CONFIG_SPIFI_LIBRARY),y)
-CFLAGS += -DEUROBIRD
-SPIFI_LIB = spifi_lib
-CSRCS += $(SPIFI_LIB)/spifi_rom_api.c
-#CSRCS += $(SPIFI_LIB)/amic.c
-#CSRCS += $(SPIFI_LIB)/atmel.c
-#CSRCS += $(SPIFI_LIB)/chi.c
-#CSRCS += $(SPIFI_LIB)/eon.c
-#CSRCS += $(SPIFI_LIB)/esmt.c
-#CSRCS += $(SPIFI_LIB)/esmt.c
-#CSRCS += $(SPIFI_LIB)/giga.c
-#CSRCS += $(SPIFI_LIB)/macronix.c
-#CSRCS += $(SPIFI_LIB)/numonyx.c
-CSRCS += $(SPIFI_LIB)/spansion.c
-#CSRCS += $(SPIFI_LIB)/sst.c
-CSRCS += $(SPIFI_LIB)/winbond.c
+CSRCS += lpc43_spifilib_init.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

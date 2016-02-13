@@ -38,16 +38,12 @@
 ASRCS =
 CSRCS = sam_boot.c sam_leds.c sam_buttons.c sam_spi.c sam_usbdev.c
 
-ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
-CSRCS += sam_cxxinitialize.c
-endif
-
 ifeq ($(CONFIG_LCD),y)
 CSRCS += sam_lcd.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += sam_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += sam_appinit.c
 endif
 
 ifeq ($(CONFIG_SAM34_HSMCI),y)

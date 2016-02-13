@@ -65,16 +65,16 @@
  */
 
 #ifdef CONFIG_SPI_DEBUG
-#  define sspdbg  lldbg
+#  define spidbg  lldbg
 #  ifdef CONFIG_SPI_VERBOSE
-#    define sspvdbg lldbg
+#    define spivdbg lldbg
 #  else
-#    define sspvdbg(x...)
+#    define spivdbg(x...)
 #  endif
 #else
 #  undef CONFIG_SPI_VERBOSE
-#  define sspdbg(x...)
-#  define sspvdbg(x...)
+#  define spidbg(x...)
+#  define spivdbg(x...)
 #endif
 
 /************************************************************************************
@@ -86,14 +86,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: pic32mx_sspinitialize
+ * Name: pic32mx_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Sure PIC32MX board.
  *
  ************************************************************************************/
 
-void weak_function pic32mx_sspinitialize(void)
+void weak_function pic32mx_spidev_initialize(void)
 {
   /* Configure the SPI chip select GPIOs */
 
@@ -107,7 +107,7 @@ void weak_function pic32mx_sspinitialize(void)
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
  *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
- *   including up_spiinitialize()) are provided by common PIC32MX logic.  To use
+ *   including pic32mx_spibus_initialize()) are provided by common PIC32MX logic.  To use
  *   this common SPI logic on your board:
  *
  *   1. Provide logic in pic32mx_boardinitialize() to configure SPI/SSP chip select
@@ -119,9 +119,9 @@ void weak_function pic32mx_sspinitialize(void)
  *      pic32mx_spiNcmddata() functions in your board-specific logic.  These
  *      functions will perform cmd/data selection operations using GPIOs in the way
  *      your board is configured.
- *   3. Add a call to up_spiinitialize() in your low level application
+ *   3. Add a call to pic32mx_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
+ *   4. The handle returned by pic32mx_spibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
@@ -134,13 +134,13 @@ enum spi_dev_e;
 #ifdef CONFIG_PIC32MX_SPI1
 void  pic32mx_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  spidbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -156,13 +156,13 @@ int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MX_SPI1
 void  pic32mx_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  spidbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -178,13 +178,13 @@ int pic32mx_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MX_SPI3
 void  pic32mx_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mx_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  spidbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }
@@ -200,13 +200,13 @@ int pic32mx_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cm
 #ifdef CONFIG_PIC32MX_SPI4
 void  pic32mx_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 #warning "Missing logic"
 }
 
 uint8_t pic32mx_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  sspdbg("Returning nothing\n");
+  spidbg("Returning nothing\n");
 #warning "Missing logic"
   return 0;
 }

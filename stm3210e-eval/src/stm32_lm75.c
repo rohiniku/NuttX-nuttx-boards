@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/stm3210e-eval/src/stm32_lm75.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
 
 #include <errno.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lm75.h>
 
 #include "stm32.h"
@@ -49,14 +49,6 @@
 #include "stm3210e-eval.h"
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_LM75) && defined(CONFIG_STM32_I2C1)
-
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
@@ -78,7 +70,7 @@
 
 int stm32_lm75initialize(FAR const char *devpath)
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   int ret;
 
   /* Configure PB.5 as Input pull-up.  This pin can be used as a temperature
@@ -89,7 +81,7 @@ int stm32_lm75initialize(FAR const char *devpath)
 
   /* Get an instance of the I2C1 interface */
 
-  i2c =  up_i2cinitialize(1);
+  i2c =  stm32_i2cbus_initialize(1);
   if (!i2c)
     {
       return -ENODEV;
@@ -100,8 +92,9 @@ int stm32_lm75initialize(FAR const char *devpath)
   ret = lm75_register(devpath, i2c, 0x48);
   if (ret < 0)
     {
-      (void)up_i2cuninitialize(i2c);
+      (void)stm32_i2cbus_uninitialize(i2c);
     }
+
   return ret;
 }
 

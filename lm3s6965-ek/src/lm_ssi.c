@@ -94,48 +94,48 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: tiva_ssiinitialize
+ * Name: lm_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LM3S6965 Eval Kit.
  *
  ************************************************************************************/
 
-void weak_function lm_ssiinitialize(void)
+void weak_function lm_ssidev_initialize(void)
 {
   /* Configure the SPI-based microSD CS GPIO */
 
-  ssi_dumpgpio("lm_ssiinitialize() Entry)");
+  ssi_dumpgpio("lm_ssidev_initialize() Entry)");
   tiva_configgpio(SDCCS_GPIO);
 #ifdef CONFIG_NX_LCDDRIVER
   tiva_configgpio(OLEDCS_GPIO);
 #endif
-  ssi_dumpgpio("lm_ssiinitialize() Exit");
+  ssi_dumpgpio("lm_ssidev_initialize() Exit");
 }
 
 /****************************************************************************
- * The external functions, tiva_spiselect and tiva_spistatus must be provided
+ * The external functions, tiva_ssiselect and tiva_ssistatus must be provided
  * by board-specific logic.  The are implementations of the select and status
  * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
- * All othermethods (including up_spiinitialize()) are provided by common
+ * All othermethods (including tiva_ssibus_initialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *
- *   1. Provide tiva_spiselect() and tiva_spistatus() functions in your
+ *   1. Provide tiva_ssiselect() and tiva_ssistatus() functions in your
  *      board-specific logic.  This function will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
- *   2. Add a call to up_spiinitialize() in your low level initialization
+ *   2. Add a call to tiva_ssibus_initialize() in your low level initialization
  *      logic
- *   3. The handle returned by up_spiinitialize() may then be used to bind the
+ *   3. The handle returned by tiva_ssibus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
-void tiva_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+void tiva_ssiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   ssidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssi_dumpgpio("tiva_spiselect() Entry");
+  ssi_dumpgpio("tiva_ssiselect() Entry");
 
   if (devid == SPIDEV_MMCSD)
     {
@@ -151,10 +151,10 @@ void tiva_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool select
       tiva_gpiowrite(OLEDCS_GPIO, !selected);
     }
 #endif
-  ssi_dumpgpio("tiva_spiselect() Exit");
+  ssi_dumpgpio("tiva_ssiselect() Exit");
 }
 
-uint8_t tiva_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t tiva_ssistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   ssidbg("Returning SPI_STATUS_PRESENT\n");
   return SPI_STATUS_PRESENT;

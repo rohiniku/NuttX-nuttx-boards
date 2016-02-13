@@ -42,8 +42,8 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += lm4f_autoleds.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += lm4f_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += lm4f_appinit.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

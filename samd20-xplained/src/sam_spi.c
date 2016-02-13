@@ -56,12 +56,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-#if defined(CONFIG_SAMD20_XPLAINED_IOMODULE) && \
-    defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE) && defined(CONFIG_SPI_OWNBUS)
-#  error CONFIG_SPI_OWNBUS must not defined if using both I/O1 and OLED1 modules
-#endif
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */
 
@@ -90,7 +84,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_spiinitialize
+ * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select PORT pins for the SAMD20 Xplained
@@ -98,7 +92,7 @@
  *
  ****************************************************************************/
 
-void weak_function sam_spiinitialize(void)
+void weak_function sam_spidev_initialize(void)
 {
   /* The I/O module containing the SD connector may or may not be installed.  And, if
    * it is installed, it may be in connector EXT1 or EXT2.
@@ -129,7 +123,7 @@ void weak_function sam_spiinitialize(void)
  *   o sam_spi[n]status and sam_spi[n]cmddata:  Implementations of the status
  *     and cmddata methods of the SPI interface defined by struct spi_ops_
  *     (see include/nuttx/spi/spi.h). All other methods including
- *     up_spiinitialize()) are provided by common SAMD/L logic.
+ *     sam_spibus_initialize()) are provided by common SAMD/L logic.
  *
  *   Where [n] is the SERCOM number for the SPI module.
  *
@@ -144,9 +138,9 @@ void weak_function sam_spiinitialize(void)
  *      sam_spi[n]cmddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using GPIOs in
  *      the way your board is configured.
- *   3. Add a call to up_spiinitialize() in your low level application
+ *   3. Add a call to sam_spibus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind
+ *   4. The handle returned by sam_spibus_initialize() may then be used to bind
  *      the  SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).

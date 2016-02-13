@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/samv71-xult/src/sam_bringup.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,9 @@
 #include <nuttx/fs/ramdisk.h>
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/binfmt/elf.h>
+#include <nuttx/i2c/i2c_master.h>
 
+#include "sam_twihs.h"
 #include "samv71-xult.h"
 
 #if defined(HAVE_S25FL1) || defined(HAVE_PROGMEM_CHARDEV)
@@ -72,7 +74,7 @@
 
 #if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
 #  include <nuttx/clock.h>
-#  include <nuttx/i2c.h>
+#  include <nuttx/i2c/i2c_master.h>
 #ifdef HAVE_RTC_DSXXXX
 #  include <nuttx/timers/ds3231.h>
 #else
@@ -102,6 +104,66 @@
 #endif
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void sam_i2c_register(int bus)
+{
+  FAR struct i2c_master_s *i2c;
+  int ret;
+
+  i2c = sam_i2cbus_initialize(bus);
+  if (i2c == NULL)
+    {
+      dbg("ERROR: Failed to get I2C%d interface\n", bus);
+    }
+  else
+    {
+      ret = i2c_register(i2c, bus);
+      if (ret < 0)
+        {
+          dbg("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
+          sam_i2cbus_uninitialize(i2c);
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_I2CTOOL
+static void sam_i2ctool(void)
+{
+#ifdef CONFIG_SAMV7_TWIHS0
+  sam_i2c_register(0);
+#endif
+#ifdef CONFIG_SAMV7_TWIHS1
+  sam_i2c_register(1);
+#endif
+#ifdef CONFIG_SAMV7_TWIHS2
+  sam_i2c_register(2);
+#endif
+}
+#else
+#  define sam_i2ctool()
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -122,7 +184,7 @@ int sam_bringup(void)
   FAR struct mtd_dev_s *mtd;
 #endif
 #if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
 #endif
 #if defined(HAVE_S25FL1_CHARDEV) || defined(HAVE_PROGMEM_CHARDEV)
   char blockdev[18];
@@ -130,13 +192,17 @@ int sam_bringup(void)
 #endif
   int ret;
 
+  /* Register I2C drivers on behalf of the I2C tool */
+
+  sam_i2ctool();
+
 #if defined(HAVE_RTC_PCF85263)
   /* Get an instance of the TWIHS0 I2C interface */
 
-  i2c = up_i2cinitialize(PCF85263_TWI_BUS);
+  i2c = sam_i2cbus_initialize(PCF85263_TWI_BUS);
   if (i2c == NULL)
     {
-      SYSLOG("ERROR: up_i2cinitialize(%d) failed\n", PCF85263_TWI_BUS);
+      SYSLOG("ERROR: sam_i2cbus_initialize(%d) failed\n", PCF85263_TWI_BUS);
     }
   else
     {
@@ -158,10 +224,10 @@ int sam_bringup(void)
 #elif defined(HAVE_RTC_DSXXXX)
   /* Get an instance of the TWIHS0 I2C interface */
 
-  i2c = up_i2cinitialize(DSXXXX_TWI_BUS);
+  i2c = sam_i2cbus_initialize(DSXXXX_TWI_BUS);
   if (i2c == NULL)
     {
-      SYSLOG("ERROR: up_i2cinitialize(%d) failed\n", DSXXXX_TWI_BUS);
+      SYSLOG("ERROR: sam_i2cbus_initialize(%d) failed\n", DSXXXX_TWI_BUS);
     }
   else
     {

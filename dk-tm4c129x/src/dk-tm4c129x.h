@@ -60,6 +60,13 @@
 #  undef CONFIG_TIVA_SSI0
 #endif
 
+/* Do we need to register I2C drivers on behalf of the I2C tool? */
+
+#define HAVE_I2CTOOL 1
+#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
+#  undef HAVE_I2CTOOL
+#endif
+
 /* LED definitions ******************************************************************/
 /* The TMC4C123G LaunchPad has a single RGB LED.  There is only one visible LED which
  * will vary in color.  But, from the standpoint of the firmware, this appears as
@@ -138,14 +145,14 @@
 #ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Name: tm4c_ssiinitialize
+ * Name: tm4c_ssidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the DK-TM4C129X.
  *
  ************************************************************************************/
 
-void weak_function tm4c_ssiinitialize(void);
+void weak_function tm4c_ssidev_initialize(void);
 
 /****************************************************************************
  * Name: tm4c_led_initialize

@@ -44,8 +44,8 @@ CSRCS += stm32_deselectnor.c stm32_selectsram.c stm32_deselectsram.c
 CSRCS += stm32_selectlcd.c stm32_deselectlcd.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += stm32_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += stm32_appinit.c
 endif
 
 ifeq ($(CONFIG_ADC),y)

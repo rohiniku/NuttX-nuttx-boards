@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sama5d3x-ek/src/sam_ov2640.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@
 #include <stdlib.h>
 #include <debug.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/video/ov2640.h>
 
@@ -51,6 +51,7 @@
 #include "sam_periphclks.h"
 #include "sam_lcd.h"
 #include "sam_pck.h"
+#include "sam_twi.h"
 #include "sam_pio.h"
 #include "chip/sam_pinmap.h"
 
@@ -151,13 +152,13 @@ static inline FAR struct fb_vtable_s *ov2640_lcd_initialize(void)
 
 static inline int ov2640_camera_initialize(void)
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   uint32_t actual;
   int ret;
 
   /* Get the I2C driver that interfaces with the camers (OV2640_BUS)*/
 
-  i2c = up_i2cinitialize(OV2640_BUS);
+  i2c = sam_i2cbus_initialize(OV2640_BUS);
   if (!i2c)
     {
       gdbg("ERROR: Failed to initialize TWI%d\n", OV2640_BUS);

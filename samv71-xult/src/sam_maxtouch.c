@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/samv7-xult/src/sam_maxtouch.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -237,7 +237,7 @@ static int mxt_interrupt(int irq, FAR void *context)
 
 int board_tsc_setup(int minor)
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   static bool initialized = false;
   int ret;
 
@@ -258,7 +258,7 @@ int board_tsc_setup(int minor)
 
       /* Get an instance of the I2C interface for the touchscreen chip select */
 
-      i2c = up_i2cinitialize(MXT_TWI_BUS);
+      i2c = sam_i2cbus_initialize(MXT_TWI_BUS);
       if (!i2c)
         {
           idbg("Failed to initialize I2C%d\n", MXT_TWI_BUS);
@@ -277,7 +277,7 @@ int board_tsc_setup(int minor)
         {
           idbg("ERROR: Failed to register touchscreen device\n");
           irq_detach(IRQ_MXT_CHG);
-          /* up_i2cuninitialize(i2c); */
+          /* sam_i2cbus_uninitialize(i2c); */
           return -ENODEV;
         }
 

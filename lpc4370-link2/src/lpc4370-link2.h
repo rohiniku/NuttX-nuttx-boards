@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/lpc4370-LINK2/src/lpc4370-LINK2.h
+ * configs/lpc4370-link2/src/lpc4370-link2.h
  *
  *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,10 +45,18 @@
 
 #include "lpc43_pinconfig.h"
 #include "lpc43_gpio.h"
+#include "lpc43_spifi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Do we need to register I2C drivers on behalf of the I2C tool? */
+
+#define HAVE_I2CTOOL 1
+#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
+#  undef HAVE_I2CTOOL
+#endif
+
 /* LED definitions **********************************************************/
 /* The LPC4370-LINK2 has one user-controllable LED labelled D6 controlled by
  * the signal LED_3V3:
@@ -90,6 +98,8 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+void board_spifi_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_LPC4370_LINK2_SRC_LPC3257_LINK2_H */

@@ -595,7 +595,6 @@ CONFIG_DEV_NULL=y
 CONFIG_ARCH_HAVE_I2CRESET=y
 # CONFIG_I2C is not set
 CONFIG_SPI=y
-# CONFIG_SPI_OWNBUS is not set
 CONFIG_SPI_EXCHANGE=y
 # CONFIG_SPI_CMDDATA is not set
 # CONFIG_SPI_CALLBACK is not set
@@ -1173,7 +1172,7 @@ CONFIG_SYSTEM_FREE=y
 #
 # INI File Parser
 #
-# CONFIG_SYSTEM_INIFILE is not set
+# CONFIG_FSUTILS_INIFILE is not set
 
 #
 # NxPlayer media player library / command Line
@@ -1206,7 +1205,6 @@ CONFIG_READLINE_ECHO=y
 #
 # RAMTRON
 #
-# CONFIG_SYSTEM_RAMTRON is not set
 
 #
 # SD Card

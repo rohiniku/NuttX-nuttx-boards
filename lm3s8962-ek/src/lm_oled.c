@@ -49,6 +49,7 @@
 #include <nuttx/lcd/p14201.h>
 
 #include "tiva_gpio.h"
+#include "tiva_ssi.h"
 #include "lm3s8962-ek.h"
 
 /****************************************************************************
@@ -109,7 +110,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 
   /* Get the SSI port (configure as a Freescale SPI port) */
 
-  spi = up_spiinitialize(0);
+  spi = tiva_ssibus_initialize(0);
   if (!spi)
     {
       glldbg("Failed to initialize SSI port 0\n");
@@ -137,7 +138,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
 }
 
 /****************************************************************************
- * Name:  tiva_spicmddata
+ * Name:  tiva_ssicmddata
  *
  * Description:
  *   Set or clear the SD1329 D/Cn bit to select data (true) or command
@@ -159,7 +160,7 @@ FAR struct lcd_dev_s *board_graphics_setup(unsigned int devno)
  *
  ****************************************************************************/
 
-int tiva_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+int tiva_ssicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
   if (devid == SPIDEV_DISPLAY)
     {

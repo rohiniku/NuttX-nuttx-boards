@@ -83,11 +83,11 @@ void stm32_boardinitialize(void)
 #endif
 
   /* Configure SPI chip selects if 1) SP2 is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
+   * stm32_spidev_initialize() has been brought into the link.
    */
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-      stm32_spiinitialize();
+      stm32_spidev_initialize();
 #endif
 
 
@@ -122,7 +122,7 @@ void board_initialize(void)
    * but the initialization function must run in kernel space.
    */
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
   board_app_initialize();
 #endif
 

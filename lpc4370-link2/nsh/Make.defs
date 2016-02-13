@@ -1,5 +1,5 @@
 ############################################################################
-# configs/lpc4357-evb/nsh/Make.defs
+# configs/lpc4370-link2/nsh/Make.defs
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

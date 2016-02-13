@@ -63,6 +63,10 @@
  *    SNP Message descriptor.
  */
 
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <stdio.h>
@@ -77,13 +81,16 @@
 #include <nuttx/clock.h>
 #include <nuttx/time.h>
 #include <nuttx/progmem.h>
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/lis331dl.h>
 #include <nuttx/wireless/cc1101.h>
 
-#include "vsn.h"
 #include "stm32_gpio.h"
+#include "stm32_spi.h"
+#include "stm32_i2c.h"
+
+#include "vsn.h"
 
 /****************************************************************************
  * Declarations and Structures
@@ -152,35 +159,36 @@ typedef unsigned char vsn_sif_gpio_t;
 #define VSN_SIF_ANIN_OVERSMP16
 
 
-struct vsn_sif_s {
-    vsn_sif_state_t     state;              // activity
-    unsigned char       opencnt;            // open count
+struct vsn_sif_s
+{
+  vsn_sif_state_t     state;              /* Activity */
+  unsigned char       opencnt;            /* Open count */
 
-    vsn_sif_gpio_t      gpio[2];
+  vsn_sif_gpio_t      gpio[2];
 
-    unsigned char       anout_opts;
-    unsigned short int  anout_width;
-    unsigned short int  anout_period;       // setting it to 0, disables PWM
-    unsigned short int  anout_samplerate;   // as written by write()
+  unsigned char       anout_opts;
+  unsigned short int  anout_width;
+  unsigned short int  anout_period;       /* Setting it to 0, disables PWM */
+  unsigned short int  anout_samplerate;   /* As written by write() */
 
-    unsigned short int  anref_width;
-    unsigned short int  anref_period;       // setting it to 0, disables PWM
-    unsigned short int  anref_samplerate;   // as written by write()
+  unsigned short int  anref_width;
+  unsigned short int  anref_period;       /* Setting it to 0, disables PWM */
+  unsigned short int  anref_samplerate;   /* As written by write() */
 
-    unsigned char       anin_opts;
-    unsigned int        anin_samplerate;    // returned on read() as 16-bit results
+  unsigned char       anin_opts;
+  unsigned int        anin_samplerate;    /* Returned on read() as 16-bit results */
 
-        /*--- Private Data ---*/
+  /*--- Private Data ---*/
 
-    struct stm32_tim_dev_s * tim3;          // Timer3 is used for PWM, and Analog RefTap
-    struct stm32_tim_dev_s * tim8;          // Timer8 is used for Power Switch
+  struct stm32_tim_dev_s *tim3;           /* Timer3 is used for PWM, and Analog RefTap */
+  struct stm32_tim_dev_s *tim8;           /* Timer8 is used for Power Switch */
 
-    struct i2c_dev_s    * i2c1;
-    struct i2c_dev_s    * i2c2;
+  struct i2c_master_s *i2c1;
+  struct i2c_master_s *i2c2;
 
-    struct spi_dev_s    * spi2;
+  struct spi_dev_s    *spi2;
 
-    sem_t               exclusive_access;
+  sem_t               exclusive_access;
 };
 
 /****************************************************************************
@@ -313,10 +321,10 @@ int sif_anout_init(void)
     STM32_TIM_SETMODE(vsn_sif.tim8, STM32_TIM_MODE_UP);
     //STM32_TIM_SETCHANNEL(vsn_sif.tim8, GPIO_OUT_PWRPWM_TIM8_CH, STM32_TIM_CH_OUTPWM | STM32_TIM_CH_POLARITY_NEG);
 
-    vsn_sif.i2c1 = up_i2cinitialize(1);
-    vsn_sif.i2c2 = up_i2cinitialize(2);
+    vsn_sif.i2c1 = stm32_i2cbus_initialize(1);
+    vsn_sif.i2c2 = stm32_i2cbus_initialize(2);
 
-    vsn_sif.spi2 = up_spiinitialize(2);
+    vsn_sif.spi2 = stm32_spibus_initialize(2);
 
     return OK;
 }
@@ -594,15 +602,12 @@ int sif_main(int argc, char *argv[])
         }
         else if (!strcmp(argv[1], "i2c") && argc == 3) {
             int val = atoi(argv[2]);
-
-            I2C_SETFREQUENCY(vsn_sif.i2c1, 100000);
-
             struct lis331dl_dev_s * lis = lis331dl_init(vsn_sif.i2c1, val);
 
             if (lis) {
                 const struct lis331dl_vector_s * a;
+                systime_t time_stamp = clock_systimer();
                 int i;
-                uint32_t time_stamp = clock_systimer();
 
                 /* Set to 400 Hz : 3 = 133 Hz/axis */
 
@@ -621,7 +626,8 @@ int sif_main(int argc, char *argv[])
                     }
                 }
 
-                printf("Time diff = %d\n", clock_systimer() - time_stamp);
+                printf("Time diff = %ld\n",
+                       (long)(clock_systimer() - time_stamp));
 
                 lis331dl_deinit(lis);
             }

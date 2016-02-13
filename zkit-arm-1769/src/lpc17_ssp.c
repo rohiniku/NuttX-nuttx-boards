@@ -94,18 +94,18 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: zkit_sspinitialize
+ * Name: zkit_sspdev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the ZKIT-ARM-1769 Kit.
  *
  ************************************************************************************/
 
-void weak_function zkit_sspinitialize(void)
+void weak_function zkit_sspdev_initialize(void)
 {
   /* Configure the SPI-based LCD CS GPIO */
 
-  ssp_dumpgpio("zkit_sspinitialize() Entry)");
+  ssp_dumpgpio("zkit_sspdev_initialize() Entry)");
 
   /* Configure chip select for the LCD. */
 
@@ -115,7 +115,7 @@ void weak_function zkit_sspinitialize(void)
 #endif
 #endif /* CONFIG_LPC17_SSP0 */
 
-  ssp_dumpgpio("zkit_sspinitialize() Exit");
+  ssp_dumpgpio("zkit_sspdev_initialize() Exit");
 }
 
 /************************************************************************************
@@ -125,7 +125,7 @@ void weak_function zkit_sspinitialize(void)
  *   The external functions, lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi/spi.h). All other methods (including lpc17_sspinitialize())
+ *   include/nuttx/spi/spi.h). All other methods (including lpc17_sspbus_initialize())
  *   are provided by common LPC17xx logic.  To use this common SPI logic on your
  *   board:
  *
@@ -134,9 +134,9 @@ void weak_function zkit_sspinitialize(void)
  *   2. Provide lpc17_ssp0/ssp1select() and lpc17_ssp0/ssp1status() functions
  *      in your board-specific logic.  These functions will perform chip selection
  *      and status operations using GPIOs in the way your board is configured.
- *   3. Add a calls to lpc17_sspinitialize() in your low level application
+ *   3. Add a calls to lpc17_sspbus_initialize() in your low level application
  *      initialization logic
- *   4. The handle returned by lpc17_sspinitialize() may then be used to bind the
+ *   4. The handle returned by lpc17_sspbus_initialize() may then be used to bind the
  *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
@@ -147,11 +147,11 @@ void weak_function zkit_sspinitialize(void)
 void  lpc17_ssp1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssp_dumpgpio("lpc17_spi1select() Entry");
+  ssp_dumpgpio("lpc17_ssp1select() Entry");
 
 #warning "Assert CS here (false)"
 
-  ssp_dumpgpio("lpc17_spi1select() Exit");
+  ssp_dumpgpio("lpc17_ssp1select() Exit");
 }
 
 uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -181,7 +181,7 @@ int weak_function lpc17_ssp1cmddata(FAR struct spi_dev_s *dev,
 void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   sspdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-  ssp_dumpgpio("lpc17_spi0select() Entry");
+  ssp_dumpgpio("lpc17_ssp0select() Entry");
 
 #ifdef CONFIG_NX_LCDDRIVER
   if (devid == SPIDEV_DISPLAY)
@@ -192,7 +192,7 @@ void  lpc17_ssp0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sel
     }
 #endif
 
-  ssp_dumpgpio("lpc17_spi0select() Exit");
+  ssp_dumpgpio("lpc17_ssp0select() Exit");
 }
 
 uint8_t lpc17_ssp0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)

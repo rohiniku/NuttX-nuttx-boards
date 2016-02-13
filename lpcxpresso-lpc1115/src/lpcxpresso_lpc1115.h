@@ -221,14 +221,14 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: lpcxpresso_sspinitialize
+ * Name: lpcxpresso_sspdev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the LPCXpresso board.
  *
  ************************************************************************************/
 
-void weak_function lpcxpresso_sspinitialize(void);
+void weak_function lpcxpresso_sspdev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* _CONFIGS_LPCXPRESSO_LPC1115_SRC_LPCXPRESSO_LPC1115L_H */

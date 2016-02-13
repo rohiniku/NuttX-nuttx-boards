@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/dk-tm4c129x/src/tiva_tmp100.c
  *
- *   Copyright (C) 2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2015-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
 
 #include <errno.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/lm75.h>
 
 #include "tiva_i2c.h"
@@ -78,12 +78,12 @@
 
 int tiva_tmp100_initialize(FAR const char *devpath)
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   int ret;
 
   /* Get an instance of the I2C6 interface */
 
-  i2c =  up_i2cinitialize(TMP100_I2CBUS);
+  i2c =  tiva_i2cbus_initialize(TMP100_I2CBUS);
   if (!i2c)
     {
       return -ENODEV;
@@ -94,7 +94,7 @@ int tiva_tmp100_initialize(FAR const char *devpath)
   ret = lm75_register(devpath, i2c, TMP100_I2CADDR);
   if (ret < 0)
     {
-      (void)up_i2cuninitialize(i2c);
+      (void)tiva_i2cbus_uninitialize(i2c);
     }
 
   return ret;

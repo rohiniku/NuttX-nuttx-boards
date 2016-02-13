@@ -44,8 +44,8 @@ else
 CSRCS += k20_userleds.c
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += k20_nsh.c
+ifeq ($(CONFIG_LIB_BOARDCTL),y)
+CSRCS += k20_appinit.c
 endif
 
 include $(TOPDIR)/configs/Board.mk

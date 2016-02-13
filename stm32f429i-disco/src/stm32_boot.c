@@ -76,12 +76,12 @@ void stm32_boardinitialize(void)
     defined(CONFIG_STM32_SPI3) || defined(CONFIG_STM32_SPI4) || \
     defined(CONFIG_STM32_SPI5)
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
+   * stm32_spidev_initialize() has been brought into the link.
    */
 
-  if (stm32_spiinitialize)
+  if (stm32_spidev_initialize)
     {
-      stm32_spiinitialize();
+      stm32_spidev_initialize();
     }
 #endif
 
@@ -143,7 +143,7 @@ void board_initialize(void)
   board_lcd_initialize();
 #endif
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_LIB_BOARDCTL)
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in user-space
    * but the initialization function must run in kernel space.

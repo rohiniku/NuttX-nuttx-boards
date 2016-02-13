@@ -880,7 +880,7 @@ CONFIG_LIB_BOARDCTL=y
 #
 # INI File Parser
 #
-# CONFIG_SYSTEM_INIFILE is not set
+# CONFIG_FSUTILS_INIFILE is not set
 
 #
 # FLASH Program Installation
@@ -915,7 +915,6 @@ CONFIG_READLINE_ECHO=y
 #
 # RAMTRON
 #
-# CONFIG_SYSTEM_RAMTRON is not set
 
 #
 # SD Card

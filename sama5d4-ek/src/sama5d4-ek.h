@@ -1,7 +1,7 @@
 /************************************************************************************
  * configs/sama5d4-ek/src/sama5d4-ek.h
  *
- *   Copyright (C) 2014-2015 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014-2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,6 +71,7 @@
 #define HAVE_PMIC        1
 #define HAVE_ELF         1
 #define HAVE_ROMFS       1
+#define HAVE_I2CTOOL     1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -478,6 +479,12 @@
 #  undef HAVE_ROMFS
 #endif
 
+/* Do we need to register I2C drivers on behalf of the I2C tool? */
+
+#if !defined(CONFIG_SYSTEM_I2CTOOL) || !defined(CONFIG_I2C_DRIVER)
+#  undef HAVE_I2CTOOL
+#endif
+
 /* procfs File System */
 
 #ifdef CONFIG_FS_PROCFS
@@ -877,7 +884,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam_spiinitialize
+ * Name: sam_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select PIO pins for the SAMA5D4-EK board.
@@ -885,7 +892,7 @@
  ************************************************************************************/
 
 #if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
-void weak_function sam_spiinitialize(void);
+void weak_function sam_spidev_initialize(void);
 #endif
 
 /************************************************************************************

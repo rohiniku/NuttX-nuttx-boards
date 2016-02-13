@@ -24,7 +24,7 @@ config ARCH_BOARD_ARDUINO_MEGA2560
 	bool "Arduino Mega 2560"
 	depends on ARCH_CHIP_ATMEGA2560
 	---help---
-                This option selects the Arduino Mega 2560 board featuring the Atmel
+		This option selects the Arduino Mega 2560 board featuring the Atmel
 		Atmega2560 MCU running at 16 MHz.        
 
 config ARCH_BOARD_ARDUINO_DUE
@@ -315,6 +315,12 @@ config ARCH_BOARD_LPC4330_XPLORER
 		NXG Technologies LPC4330 Xplorer board.  This board is based on the
 		LPC4330FET100.  The Code Red toolchain is used by default.
 
+config ARCH_BOARD_LPC4337_WS
+	bool "WaveShare LPC4337-WS"
+	depends on ARCH_CHIP_LPC4337JBD144
+	---help---
+		The WaveShare LPC4337-ws board featuring the NXP LPC4337JBD144 MCU.
+
 config ARCH_BOARD_LPC4357_EVB
 	bool "NXP LPC4357-EVB"
 	depends on ARCH_CHIP_LPC4357FET256
@@ -503,6 +509,17 @@ config ARCH_BOARD_OLIMEX_STM32H405
 		toolchain* under Linux or Cygwin. See the http://www.olimex.com for
 		further information. This board features the STMicro STM32F405RGT6
 		MCU.
+
+config ARCH_BOARD_OLIMEX_STM32H407
+	bool "Olimex STM32 H407 board"
+	depends on ARCH_CHIP_STM32F407ZG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This port uses the Olimex STM32 H407 board and a GNU arm-nuttx-elf
+		toolchain* under Linux or Cygwin. See the http://www.olimex.com for
+		further information. This board features the STMicro STM32F407ZGT6 (144pins).
 
 config ARCH_BOARD_OLIMEX_STM32P107
 	bool "Olimex STM32 P107 board"
@@ -1053,6 +1070,15 @@ config ARCH_BOARD_TWR_K60N512
 		Kinetis K60 Cortex-M4 MCU.  This port uses the FreeScale TWR-K60N512
 		development board.
 
+config ARCH_BOARD_U_BLOX_C027
+	bool "u-blox C027"
+	depends on ARCH_CHIP_LPC1768
+	select ARCH_HAVE_LEDS
+	---help---
+		u-blox GSM and GPS module evaluation board with NXP LPCExpresso
+		LPC1768.  The GSM module is one of LISA-C200, LISA-U200 or SARA-G350.
+		The GPS module is one of MAX-M7 or MAX-M8.
+
 config ARCH_BOARD_UBW32
 	bool "UBW32 v2.4 board from Sparkfun"
 	depends on ARCH_CHIP_PIC32MX460F512L
@@ -1295,6 +1321,7 @@ config ARCH_BOARD
 	default "lm3s8962-ek"              if ARCH_BOARD_LM3S8962EK
 	default "lm4f120-launchpad"        if ARCH_BOARD_LM4F120_LAUNCHPAD
 	default "lpc4330-xplorer"          if ARCH_BOARD_LPC4330_XPLORER
+	default "lpc4337-ws"               if ARCH_BOARD_LPC4337_WS
 	default "lpc4357-evb"              if ARCH_BOARD_LPC4357_EVB
 	default "lpc4370-link2"            if ARCH_BOARD_LPC4370_LINK2
 	default "lpcxpresso-lpc1115"       if ARCH_BOARD_LPCXPRESSO_LPC1115
@@ -1315,6 +1342,7 @@ config ARCH_BOARD
 	default "olimex-lpc2378"           if ARCH_BOARD_OLIMEXLPC2378
 	default "olimex-lpc-h3131"         if ARCH_BOARD_OLIMEX_LPC_H3131
 	default "olimex-stm32-h405"        if ARCH_BOARD_OLIMEX_STM32H405
+	default "olimex-stm32-h407"        if ARCH_BOARD_OLIMEX_STM32H407
 	default "olimex-stm32-p107"        if ARCH_BOARD_OLIMEX_STM32P107
 	default "olimex-stm32-p207"        if ARCH_BOARD_OLIMEX_STM32P207
 	default "olimex-strp711"           if ARCH_BOARD_OLIMEX_STRP711
@@ -1367,6 +1395,7 @@ config ARCH_BOARD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
 	default "cc3200-launchpad"         if ARCH_BOARD_CC3200_LAUNCHPAD
 	default "twr-k60n512"              if ARCH_BOARD_TWR_K60N512
+        default "u-blox-c027"              if ARCH_BOARD_U_BLOX_C027
 	default "ubw32"                    if ARCH_BOARD_UBW32
 	default "us7032evb1"               if ARCH_BOARD_US7032EVB1
 	default "viewtool-stm32f107"       if ARCH_BOARD_VIEWTOOL_STM32F107
@@ -1534,6 +1563,9 @@ endif
 if ARCH_BOARD_LPC4330_XPLORER
 source "configs/lpc4330-xplorer/Kconfig"
 endif
+if ARCH_BOARD_LPC4337_WS
+source "configs/lpc4337-ws/Kconfig"
+endif
 if ARCH_BOARD_LPC4357_EVB
 source "configs/lpc4357-evb/Kconfig"
 endif
@@ -1593,6 +1625,9 @@ source "configs/olimex-lpc-h3131/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32H405
 source "configs/olimex-stm32-h405/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STM32H407
+source "configs/olimex-stm32-h407/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32P107
 source "configs/olimex-stm32-p107/Kconfig"
@@ -1740,6 +1775,9 @@ source "configs/cc3200-launchpad/Kconfig"
 endif
 if ARCH_BOARD_TWR_K60N512
 source "configs/twr-k60n512/Kconfig"
+endif
+if ARCH_BOARD_U_BLOX_C027
+source "configs/u-blox-c027/Kconfig"
 endif
 if ARCH_BOARD_UBW32
 source "configs/ubw32/Kconfig"

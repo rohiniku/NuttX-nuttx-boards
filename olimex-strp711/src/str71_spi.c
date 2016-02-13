@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/olimex-strp711/src/str71_spi.c
  *
- *   Copyright (C) 2008-2010,2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -381,6 +383,7 @@ struct str71x_spidev_s
   bool             initialized; /* Initialize port only once! */
   uint32_t         spibase;     /* BSPIn base address */
   uint16_t         csbit;       /* BSPIn SS bit int GPIO0 */
+  sem_t            exclsem;     /* Supports mutually exclusive access */
 };
 
 /****************************************************************************
@@ -395,9 +398,7 @@ static inline void spi_drain(FAR struct str71x_spidev_s *priv);
 
 /* SPI methods */
 
-#ifndef CONFIG_SPI_OWNBUS
 static int    spi_lock(FAR struct spi_dev_s *dev, bool lock);
-#endif
 static void   spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency);
 static uint8_t  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
@@ -414,9 +415,7 @@ static void   spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t 
 
 static const struct spi_ops_s g_spiops =
 {
-#ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
-#endif
   .select            = spi_select,
   .setfrequency      = spi_setfrequency,
   .status            = spi_status,
@@ -434,7 +433,8 @@ static struct str71x_spidev_s g_spidev0 =
 {
   .spidev  = { &g_spiops },
   .spibase = STR71X_BSPI0_BASE,
-  .csbit   = ENC_GPIO0_CS
+  .csbit   = ENC_GPIO0_CS,
+  .exclsem = SEM_INITIALIZER(1)
 };
 #endif
 
@@ -443,7 +443,8 @@ static struct str71x_spidev_s g_spidev1 =
 {
   .spidev  = { &g_spiops },
   .spibase = STR71X_BSPI1_BASE,
-  .csbit   = MMCSD_GPIO0_CS
+  .csbit   = MMCSD_GPIO0_CS,
+  .exclsem = SEM_INITIALIZER(1)
 };
 #endif
 
@@ -563,14 +564,30 @@ static inline void spi_drain(FAR struct str71x_spidev_s *priv)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
-  /* Not implemented */
+  FAR struct str71x_spidev_s *priv = (FAR struct str71x_spidev_s *)dev;
 
-  return -ENOSYS;
+  if (lock)
+    {
+      /* Take the semaphore (perhaps waiting) */
+
+      while (sem_wait(&priv->exclsem) != 0)
+        {
+          /* The only case that an error should occur here is if the wait
+           * was awakened by a signal.
+           */
+
+          DEBUGASSERT(errno == EINTR);
+        }
+    }
+  else
+    {
+      (void)sem_post(&priv->exclsem);
+    }
+
+  return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: spi_select
@@ -922,7 +939,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t bu
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_spiinitialize
+ * Name: str71_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI port.  This function could get called
@@ -936,7 +953,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t bu
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *up_spiinitialize(int port)
+FAR struct spi_dev_s *str71_spibus_initialize(int port)
 {
   FAR struct spi_dev_s *ret;
 #if defined(CONFIG_STR71X_BSPI0) || defined(CONFIG_STR71X_BSPI1)

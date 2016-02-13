@@ -1,7 +1,7 @@
 /****************************************************************************
  * config/sama5d3x-ek/src/tm4c_at24.c
  *
- *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014, 2016 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,10 +61,11 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/i2c.h>
+#include <nuttx/i2c/i2c_master.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
 
+#include "tiva_i2c.h"
 #include "tm4c123g-launchpad.h"
 
 #ifdef HAVE_AT24
@@ -87,7 +88,7 @@
 
 int tm4c_at24_automount(int minor)
 {
-  FAR struct i2c_dev_s *i2c;
+  FAR struct i2c_master_s *i2c;
   FAR struct mtd_dev_s *mtd;
   static bool initialized = false;
   int ret;
@@ -98,7 +99,7 @@ int tm4c_at24_automount(int minor)
     {
       /* No.. Get the I2C bus driver */
 
-      i2c = up_i2cinitialize(AT24_BUS);
+      i2c = tiva_i2cbus_initialize(AT24_BUS);
       if (!i2c)
         {
           syslog(LOG_ERR, "ERROR: Failed to initialize SPI%d\n", AT24_BUS);
